@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, target-densitydpi=device-dpi">
+        <title>合コンクエスト</title>
+        <script type="text/javascript" src="9leap/enchant.js"></script>
+        <script type="text/javascript" src="9leap/ui.enchant.js"></script>
+        <script type="text/javascript" src="9leap/gcqCore.js"></script>
+        <script type="text/javascript" src="9leap/gcqEngine.js"></script>
+        <script type="text/javascript" src="gcqEngineFactoryTw.js"></script>
+        <script type="text/javascript" src="9leap/gcqEngineFactory.js"></script>
+        <script type="text/javascript" src="9leap/gcqSceneTitle.js"></script>
+        <script type="text/javascript" src="gcqSceneGirl.js"></script>
+        <script type="text/javascript" src="9leap/gcqSceneFriend.js"></script>
+        <script type="text/javascript" src="gcqSceneLoading.js"></script>
+        <script type="text/javascript" src="9leap/gcqSceneBattle.js"></script>
+        <script type="text/javascript" src="gcqSceneResultTw.js"></script>
+        <script type="text/javascript">
+            enchant();
+            window.onload = function() {
+                var wid = 320, hei = 448;
+                var game = new Game(wid, hei);
+                game.fps = 30;
+                game.preload('girls.png', 'heart.png', 'title.png', 'camera.png');
+                game.rootScene.backgroundColor = "black";
+                game.onload = function() {
+                    title = new Sprite(320, 320);
+                    title.image = game.assets['title.png'];
+                    title.y = 48;
+                    pressStart = new Label('そのまま遊ぶ');
+                    pressStart._element.classList.add('button');
+                    pressStart._element.style.textAlign = 'center';
+                    pressStart.y = 300;
+                    pressStart.addEventListener('touchend', function() {
+                        GcqEngineFactory.setFriendJob((Math.random() * 4 + 1) | 0, (Math.random() * 4 + 1) | 0);
+                        Game.instance.replaceScene(new BattleScene());
+                    });
+                    loginTwitter = new Label('twitterで遊ぶ');
+                    loginTwitter._element.classList.add('button');
+                    loginTwitter._element.style.textAlign = 'center';
+                    loginTwitter.y = 340;
+                    loginTwitter.addEventListener('touchend', function() {
+                        location.href = 'login:///';
+                    });
+                    scene = new Scene;
+                    scene.addChild(title);
+                    scene.addChild(pressStart);
+                    scene.addChild(loginTwitter);
+                    game.pushScene(scene);
+                    //game.pushScene(new GirlScene(qsParm["id"]));
+                };
+                game.start();
+            };
+            window.onFriendsLoad = function(friends) {
+                var girls = [friends.heroine.subName],
+                    topics = friends.heroine.words.map(function(e) { return new Topic(e, 0); }),
+                    boys = [friends.player.subName];
+                friends.neighbors.forEach(function(e, i) {
+                    if (e.words.length > 0) {
+                        girls.push(e.subName);
+                        topics.concat(e.words.map(function(e) { return new Topic(e, i + 1); }));
+                    } else {
+                        boys.push(e.subName);
+                    }
+                });
+                GcqEngineFactoryTw.setFriendJob(Job.Ike, Job.Ike);
+                GcqEngineFactoryTw.boysName = boys;
+                GcqEngineFactoryTw.girlsName = girls;
+                GcqEngineFactoryTw.topics = topics;
+                GcqEngineFactory = GcqEngineFactoryTw;
+                Game.instance.replaceScene(new BattleScene());
+            }
+        </script>
+        <style type="text/css">
+            body { margin:0; background-color:black; }
+            .button {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 14px;
+                color: #ffffff;
+                padding: 5px;
+                background: -moz-linear-gradient(
+                    top,
+                    #a3a3a3 0%,
+                    #3b3b3b 50%,
+                    #242424 50%,
+                    #000000);
+                background: -webkit-gradient(
+                    linear, left top, left bottom,
+                    from(#a3a3a3),
+                    color-stop(0.50, #3b3b3b),
+                    color-stop(0.50, #242424),
+                    to(#000000));
+                -moz-border-radius: 10px;
+                -webkit-border-radius: 10px;
+                border-radius: 10px;
+                border: 1px solid #000000;
+                -moz-box-shadow:
+                    0px 1px 3px rgba(000,000,000,0.5),
+                    inset 0px 0px 1px rgba(255,255,255,0.6);
+                -webkit-box-shadow:
+                    0px 1px 3px rgba(000,000,000,0.5),
+                    inset 0px 0px 1px rgba(255,255,255,0.6);
+                box-shadow:
+                    0px 1px 3px rgba(000,000,000,0.5),
+                    inset 0px 0px 1px rgba(255,255,255,0.6);
+                text-shadow:
+                    0px -1px 0px rgba(000,000,000,1),
+                    0px 1px 0px rgba(255,255,255,0.2);
+            }
+        </style>
+    </head>
+    <body>
+    </body>
+</html>

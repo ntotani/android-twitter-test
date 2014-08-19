@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>AI</title>
+<script language="JavaScript" type="text/javascript" src="app/jsUnitCore.js"></script>
+<script language="JavaScript" type="text/javascript" src="../enchant.js"></script>
+<script language="JavaScript" type="text/javascript" src="../gcqCore.js"></script>
+<script language="JavaScript" type="text/javascript" src="../gcqEngine.js"></script>
+<script language="JavaScript" type="text/javascript" src="../gcqEngineFactory.js"></script>
+<script language="JavaScript" type="text/javascript">
+
+function testIkemenRelease() {
+  GcqEngineFactory.setFriendJob(Job.Ike, Job.Ike);
+  var engine = GcqEngineFactory.createEngine();
+  engine.girls[0].love = 0;
+  engine.boys[0].love = 0;
+  engine.executeFriend(1);
+  assertEquals(-1, engine.girls[0].love);
+  assertEquals(-1, engine.boys[0].love);
+}
+
+function testIkemenPropose() {
+  GcqEngineFactory.setFriendJob(Job.Ike, Job.Ike);
+  var engine = GcqEngineFactory.createEngine();
+  engine.girls[0].like[1] = 100;
+  engine.girls[1].like[1] = 101;
+  engine.executeFriend(1);
+  assertEquals(1, engine.girls[0].love);
+  assertEquals(0, engine.boys[1].love);
+}
+
+function testIkemenLie() {
+  Boy.def.ikeLieRevealProb = [1, 0];
+  GcqEngineFactory.setFriendJob(Job.Ike, Job.Ike);
+  var engine = GcqEngineFactory.createEngine();
+  engine.girls[1].like[1] += 1;
+  engine.girls[0].like[0] += 1;
+  engine.executeFriend(1);
+  var expected = Girl.def.like + Boy.def.attack[Job.Ike];
+  assertEquals(expected, engine.girls[0].like[1]);
+}
+
+function testIkemenReveal() {
+  Boy.def.ikeLieRevealProb = [0, 1];
+  GcqEngineFactory.setFriendJob(Job.Ike, Job.Ike);
+  var engine = GcqEngineFactory.createEngine();
+  engine.girls[1].like[1] += 1;
+  engine.girls[0].like[0] += 1;
+  engine.executeFriend(1);
+  var expected = Girl.def.like - Boy.def.attack[Job.Ike];
+  assertEquals(expected, engine.girls[0].like[1]);
+}
+
+function testIkemenTalk() {
+  GcqEngineFactory.setFriendJob(Job.Ike, Job.Ike);
+  var engine = GcqEngineFactory.createEngine();
+  engine.topics = [new Topic("", 0)];
+  engine.girls[1].like[1] += 1;
+  engine.executeFriend(1);
+  var expected = Girl.def.like + engine.boys[1].attack;
+  assertEquals(expected, engine.girls[0].like[1]);
+}
+
+function testKazPropose() {
+  GcqEngineFactory.setFriendJob(Job.Kaz, Job.Ike);
+  var engine = GcqEngineFactory.createEngine();
+  engine.girls[0].like = [99, 100, 99];
+  engine.girls[1].like = [100, 50, 100];
+  engine.executeFriend(1);
+  assertEquals(1, engine.girls[0].love);
+  assertEquals(0, engine.boys[1].love);
+}
+
+function testKazTalk() {
+  Boy.def.kazTalkLieRevealProb = [1, 0, 0];
+  GcqEngineFactory.setFriendJob(Job.Kaz, Job.Ike);
+  var engine = GcqEngineFactory.createEngine();
+  engine.topics = [new Topic("", 0)];
+  engine.girls[1].like[0] += 1;
+  engine.executeFriend(1);
+  var expected = Girl.def.like + Boy.def.attack[Job.Kaz];
+  assertEquals(expected, engine.girls[0].like[1]);
+}
+
+function testKazLie() {
+  Boy.def.kazTalkLieRevealProb = [0, 1, 0];
+  GcqEngineFactory.setFriendJob(Job.Kaz, Job.Ike);
+  var engine = GcqEngineFactory.createEngine();
+  engine.topics = [new Topic("", 1)];
+  engine.girls[1].like[0] += 1;
+  engine.executeFriend(1);
+  var expected = Girl.def.like + Boy.def.attack[Job.Kaz];
+  assertEquals(expected, engine.girls[0].like[1]);
+}
+
+function testKazReveal() {
+  Boy.def.kazTalkLieRevealProb = [0, 0, 1];
+  GcqEngineFactory.setFriendJob(Job.Kaz, Job.Ike);
+  var engine = GcqEngineFactory.createEngine();
+  engine.girls[1].like[0] += 1;
+  engine.executeFriend(1);
+  var expected = Girl.def.like - Boy.def.attack[Job.Kaz];
+  assertEquals(expected, engine.girls[0].like[1]);
+}
+
+function testMorPropose() {
+  GcqEngineFactory.setFriendJob(Job.Mor, Job.Ike);
+  var engine = GcqEngineFactory.createEngine();
+  engine.girls[0].like[1] = 100;
+  engine.executeFriend(1);
+  assertEquals(1, engine.girls[0].love);
+  assertEquals(0, engine.boys[1].love);
+}
+
+function testPie() {
+  GcqEngineFactory.setFriendJob(Job.Pie, Job.Ike);
+  var engine = GcqEngineFactory.createEngine();
+  engine.executeFriend(1);
+  assertEquals(-1, engine.girls[0].love);
+  assertEquals(-1, engine.girls[1].love);
+  assertEquals(-1, engine.girls[2].love);
+  assertEquals(-1, engine.boys[1].love);
+}
+
+</script>
+</head>
+
+<body>
+<h1>Sample Test File</h1>
+</body>
+
+</html>

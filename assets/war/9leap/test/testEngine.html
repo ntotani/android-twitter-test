@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Engine</title>
+<script language="JavaScript" type="text/javascript" src="app/jsUnitCore.js"></script>
+<script language="JavaScript" type="text/javascript" src="../enchant.js"></script>
+<script language="JavaScript" type="text/javascript" src="../gcqCore.js"></script>
+<script language="JavaScript" type="text/javascript" src="../gcqEngine.js"></script>
+<script language="JavaScript" type="text/javascript" src="../gcqEngineFactory.js"></script>
+<script language="JavaScript" type="text/javascript">
+
+var engine;
+function setUp() {
+  GcqEngineFactory.setFriendJob(Job.Ike, Job.Kaz);
+  engine = GcqEngineFactory.createEngine();
+}
+
+function testTalkSuccess() {
+  var res = engine.talk(0, 0, new Topic("", 0));
+  assertEquals(res.success, true);
+  var expected = Girl.def.like + Boy.def.attack[Job.Pla];
+  assertEquals(expected, engine.girls[0].like[0]);
+  expected = Girl.def.tension + Boy.def.attack[Job.Pla];
+  assertEquals(expected, engine.girls[0].tension);
+}
+
+function testTalkMiss() {
+  engine.talk(0, 1, new Topic("", 0));
+  assertEquals(Girl.def.like, engine.girls[1].like[0]);
+  var expected = Girl.def.tension - Boy.def.attack[Job.Pla];
+  assertEquals(expected, engine.girls[1].tension);
+}
+
+function testProposeSuc() {
+  engine.girls[0].like[0] = 100;
+  engine.propose(0, 0);
+  assertEquals(0, engine.girls[0].love);
+  assertEquals(0, engine.boys[0].love);
+}
+
+function testProposeMiss() {
+  engine.girls[0].like[0] = 0;
+  engine.propose(0, 0);
+  var expected = 0 - Boy.def.attack[Job.Pla];
+  assertEquals(expected, engine.girls[0].like[0]);
+  expected = Girl.def.tension - Boy.def.attack[Job.Pla];
+  assertEquals(expected, engine.girls[0].tension);
+}
+
+function testLie() {
+  engine.lie(0, 0, new Topic("", 0));
+  var attack = Boy.def.attack[Job.Pla];
+  var expe = Girl.def.like + attack;
+  assertEquals(expe, engine.girls[0].like[0]);
+  assertEquals(attack, engine.girls[0].lie[0]);
+}
+
+function testRevealSuc() {
+  engine.girls[0].lie[1] = 10;
+  engine.reveal(0, 0);
+  assertEquals(Girl.def.like - 20, engine.girls[0].like[1]);
+  assertEquals(0, engine.girls[0].lie[1]);
+}
+
+function testRevealMis() {
+  engine.girls[0].lie[0] = 10;
+  engine.reveal(0, 0);
+  var expected = Girl.def.like - Boy.def.attack[Job.Pla];
+  assertEquals(expected, engine.girls[0].like[0]);
+  assertEquals(10, engine.girls[0].lie[0]);
+}
+
+function testRevealMisDraw() {
+  engine.girls[0].lie[0] = 10;
+  engine.girls[0].lie[1] = 10;
+  engine.girls[0].lie[2] = 10;
+  engine.reveal(0, 0);
+  var expected = Girl.def.like - Boy.def.attack[Job.Pla];
+  assertEquals(expected, engine.girls[0].like[0]);
+  assertEquals(10, engine.girls[0].lie[0]);
+}
+
+function testLoveReleaseTalk() {
+  engine.boys[1].love = 0;
+  engine.girls[0].love = 1;
+  engine.girls[0].like[1] = Girl.def.loveArea - 1;
+  engine.talk(0, 0, new Topic("", 0));
+  assertEquals(-1, engine.boys[1].love);
+  assertEquals(-1, engine.girls[0].love);
+}
+
+function testLoveReleasePropose() {
+  engine.boys[1].love = 0;
+  engine.girls[0].love = 1;
+  engine.girls[0].like[1] = Girl.def.loveArea - 1;
+  engine.propose(0, 0);
+  assertEquals(-1, engine.boys[1].love);
+  assertEquals(-1, engine.girls[0].love);
+}
+
+function testLoveReleaseLie() {
+  engine.boys[1].love = 0;
+  engine.girls[0].love = 1;
+  engine.girls[0].like[1] = Girl.def.loveArea - 1;
+  engine.lie(0, 0, new Topic("", 0));
+  assertEquals(-1, engine.boys[1].love);
+  assertEquals(-1, engine.girls[0].love);
+}
+
+function testLoveReleaseReveal() {
+  engine.boys[1].love = 0;
+  engine.girls[0].love = 1;
+  engine.girls[0].lie[1] = 10;
+  engine.reveal(0, 0);
+  assertEquals(-1, engine.boys[1].love);
+  assertEquals(0, engine.girls[0].love);
+  assertEquals(0, engine.girls[0].like[1]);
+  assertEquals(0, engine.girls[0].lie[1]);
+  assertEquals(0, engine.boys[0].love);
+  assertEquals(engine.girls[0].loveArea, engine.girls[0].like[0]);
+}
+
+function testLoveSuccess() {
+  engine.boys[0].love = 0;
+  engine.girls[0].love = 0;
+  engine.girls[0].like[0] = 100;
+  var ret = engine.love(0);
+  assertEquals(true, ret.success);
+  assertEquals(false, engine.boys[0].exist);
+  assertEquals(false, engine.girls[0].exist);
+}
+
+function testLoveMiss() {
+  engine.boys[0].love = 0;
+  engine.girls[0].love = 0;
+  engine.girls[0].like[0] = 0;
+  var ret = engine.love(0);
+  assertEquals(false, ret.success);
+  assertEquals((100 - Girl.def.loveArea) / 5, engine.girls[0].like[0]);
+  assertEquals(true, engine.boys[0].exist);
+  assertEquals(true, engine.girls[0].exist);
+}
+
+</script>
+</head>
+
+<body>
+<h1>Sample Test File</h1>
+</body>
+
+</html>
